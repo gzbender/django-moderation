@@ -6,7 +6,7 @@ from moderation.diff import get_changes_between_models, html_to_list,\
 from django.test.testcases import TestCase, OutputChecker
 from moderation.tests.utils.testsettingsmanager import SettingsTestCase
 from django.core import management
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db.models import fields
 from moderation.tests.apps.test_app1.models import UserProfile, \
     ModelWIthDateField, ModelWithImage
@@ -105,7 +105,7 @@ class DiffModeratedObjectTestCase(SettingsTestCase):
             u"u'userprofile__user': Change object: 1 - 1}")
 
     def test_foreign_key_changes(self):
-        self.profile.user = User.objects.get(username='admin')
+        self.profile.user = get_user_model().objects.get(username='admin')
         moderated_object = ModeratedObject(content_object=self.profile)
         moderated_object.save()
 

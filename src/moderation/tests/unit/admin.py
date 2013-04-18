@@ -8,7 +8,7 @@ from moderation.models import ModeratedObject,\
     MODERATION_DRAFT_STATE, MODERATION_STATUS_APPROVED,\
     MODERATION_STATUS_REJECTED, MODERATION_STATUS_PENDING
 from django.contrib.admin.sites import site
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from moderation.tests.apps.test_app1.models import UserProfile, \
     ModelWithSlugField, ModelWithSlugField2, SuperUserProfile
@@ -16,6 +16,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from moderation.tests.utils import setup_moderation, teardown_moderation
 from moderation.tests.utils.testsettingsmanager import SettingsTestCase
 
+
+USER_MODEL = get_user_model()
 
 class ModeratedObjectAdminTestCase(TestCase):
     fixtures = ['test_users.json']
@@ -25,10 +27,10 @@ class ModeratedObjectAdminTestCase(TestCase):
         rf = RequestFactory()
         rf.login(username='admin', password='aaaa')
         self.request = rf.get('/admin/moderation/')
-        self.request.user = User.objects.get(username='admin')
+        self.request.user = USER_MODEL.objects.get(username='admin')
         self.admin = ModeratedObjectAdmin(ModeratedObject, site)
 
-        for user in User.objects.all():
+        for user in USER_MODEL.objects.all():
             ModeratedObject(content_object=user).save()
 
     def test_get_actions_should_not_return_delete_selected(self):
@@ -36,7 +38,7 @@ class ModeratedObjectAdminTestCase(TestCase):
         self.failIfEqual('delete_selected' in actions, True)
 
     def test_content_object_returns_deserialized_object(self):
-        user = User.objects.get(username='admin')
+        user = USER_MODEL.objects.get(username='admin')
         moderated_object = ModeratedObject(content_object=user)
         moderated_object.save()
         content_object = self.admin.content_object(moderated_object)
@@ -56,12 +58,12 @@ class AdminActionsTestCase(TestCase):
         rf = RequestFactory()
         rf.login(username='admin', password='aaaa')
         self.request = rf.get('/admin/moderation/')
-        self.request.user = User.objects.get(username='admin')
+        self.request.user = USER_MODEL.objects.get(username='admin')
         self.admin = ModeratedObjectAdmin(ModeratedObject, site)
 
-        self.moderation = setup_moderation([User])
+        self.moderation = setup_moderation([USER_MODEL])
 
-        for user in User.objects.all():
+        for user in USER_MODEL.objects.all():
             ModeratedObject(content_object=user).save()
 
         self.moderated_objects = ModeratedObject.objects.all()
@@ -113,7 +115,7 @@ class ModerationAdminSendMessageTestCase(SettingsTestCase):
         rf = RequestFactory()
         rf.login(username='admin', password='aaaa')
         self.request = rf.get('/admin/moderation/')
-        self.request.user = User.objects.get(username='admin')
+        self.request.user = USER_MODEL.objects.get(username='admin')
         self.request._messages = mock.Mock()
         self.admin = ModerationAdmin(UserProfile, site)
 
@@ -127,7 +129,7 @@ class ModerationAdminSendMessageTestCase(SettingsTestCase):
     def test_send_message_when_object_has_no_moderated_object(self):
         profile = SuperUserProfile(description='Profile for new user',
                                    url='http://www.yahoo.com',
-                                   user=User.objects.get(username='user1'),
+                                   user=USER_MODEL.objects.get(username='user1'),
                                    super_power='text')
 
         profile.save()
@@ -195,7 +197,7 @@ else:
             rf = RequestFactory()
             rf.login(username='admin', password='aaaa')
             self.request = rf.get('/admin/moderation/')
-            self.request.user = User.objects.get(username='admin')
+            self.request.user = USER_MODEL.objects.get(username='admin')
             self.admin = ModerationAdmin(UserProfile, site)
 
             models = [ModelWithSlugField2, ModelWithSlugField]

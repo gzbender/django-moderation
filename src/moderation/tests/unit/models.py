@@ -1,7 +1,8 @@
 from moderation.tests.utils.testsettingsmanager import SettingsTestCase
 from django import VERSION
 from django.core import management
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
+from django.contrib.auth import get_user_model
 from moderation.tests.apps.test_app1.models import UserProfile,\
     SuperUserProfile, ModelWithSlugField2, ProxyProfile
 from moderation.models import ModeratedObject, MODERATION_STATUS_APPROVED,\
@@ -15,12 +16,14 @@ from moderation.tests.utils import setup_moderation, teardown_moderation
 from moderation.tests.utils import unittest
 
 
+USER_MODEL = get_user_model()
+
 class SerializationTestCase(SettingsTestCase):
     fixtures = ['test_users.json', 'test_moderation.json']
     test_settings = 'moderation.tests.settings.generic'
 
     def setUp(self):
-        self.user = User.objects.get(username='moderator')
+        self.user = USER_MODEL.objects.get(username='moderator')
         self.profile = UserProfile.objects.get(user__username='moderator')
 
     def test_serialize_of_object(self):
@@ -40,7 +43,7 @@ class SerializationTestCase(SettingsTestCase):
 
         profile = SuperUserProfile(description='Profile for new super user',
                                    url='http://www.test.com',
-                                   user=User.objects.get(username='user1'),
+                                   user=USER_MODEL.objects.get(username='user1'),
                                    super_power='invisibility')
         profile.save()
         json_field = SerializedObjectField()
@@ -114,7 +117,7 @@ class SerializationTestCase(SettingsTestCase):
         "Handle proxy models in the serialization."
         profile = ProxyProfile(description="I'm a proxy.",
                                url="http://example.com",
-                               user=User.objects.get(username='user1'))
+                               user=USER_MODEL.objects.get(username='user1'))
         profile.save()
         json_field = SerializedObjectField()
 
@@ -145,7 +148,7 @@ class ModerateTestCase(SettingsTestCase):
     urls = 'moderation.tests.urls.default'
 
     def setUp(self):
-        self.user = User.objects.get(username='moderator')
+        self.user = USER_MODEL.objects.get(username='moderator')
         self.profile = UserProfile.objects.get(user__username='moderator')
         self.moderation = setup_moderation([UserProfile])
 
@@ -191,7 +194,7 @@ class ModerateTestCase(SettingsTestCase):
     def test_approve_moderated_object_new_model_instance(self):
         profile = UserProfile(description='Profile for new user',
                               url='http://www.test.com',
-                              user=User.objects.get(username='user1'))
+                              user=USER_MODEL.objects.get(username='user1'))
 
         profile.save()
 
@@ -248,7 +251,7 @@ class AutoModerateTestCase(SettingsTestCase):
 
         self.moderation.register(UserProfile, UserProfileModerator)
 
-        self.user = User.objects.get(username='moderator')
+        self.user = USER_MODEL.objects.get(username='moderator')
         self.profile = UserProfile.objects.get(user__username='moderator')
 
     def tearDown(self):

@@ -3,7 +3,7 @@ from moderation.tests.apps.test_app1.models import UserProfile, ModelWithImage
 from django.forms import CharField
 from moderation.forms import BaseModeratedObjectForm
 from moderation.register import ModerationManager
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from moderation.tests.utils.testsettingsmanager import SettingsTestCase
 from moderation.tests.utils import setup_moderation, teardown_moderation
 
@@ -13,7 +13,7 @@ class FormsTestCase(SettingsTestCase):
     test_settings = 'moderation.tests.settings.generic'
 
     def setUp(self):
-        self.user = User.objects.get(username='moderator')
+        self.user = get_user_model().objects.get(username='moderator')
 
         class ModeratedObjectForm(BaseModeratedObjectForm):
             extra = CharField(required=False)

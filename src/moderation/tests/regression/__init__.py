@@ -1,7 +1,7 @@
 from moderation.tests.utils.testsettingsmanager import SettingsTestCase
 from moderation.register import ModerationManager
 from moderation.tests.apps.test_app1.models import UserProfile
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from moderation.models import MODERATION_STATUS_APPROVED
 import django
 from moderation.tests.utils import setup_moderation, teardown_moderation
@@ -22,9 +22,10 @@ class CSRFMiddlewareTestCase(SettingsTestCase):
         teardown_moderation()
 
     def test_csrf_token(self):
+        user = get_user_model().objects.get(username='user1')
         profile = UserProfile(description='Profile for new user',
                               url='http://www.yahoo.com',
-                              user=User.objects.get(username='user1'))
+                              user=user)
 
         profile.save()
 
@@ -58,7 +59,7 @@ class AutomoderationRuntimeErrorRegressionTestCase(SettingsTestCase):
     def setUp(self):
         setup_moderation([UserProfile])
 
-        self.user = User.objects.get(username='admin')
+        self.user = get_user_model().objects.get(username='admin')
 
     def tearDown(self):
         teardown_moderation()

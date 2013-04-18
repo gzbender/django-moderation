@@ -5,7 +5,8 @@ from moderation.register import ModerationManager
 from moderation.moderator import GenericModerator
 from moderation.managers import ModerationObjectsManager
 from django.core import mail
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
+from django.contrib.auth import get_user_model
 from moderation.models import ModeratedObject, MODERATION_STATUS_APPROVED
 from django.db.models.manager import Manager
 import unittest
@@ -13,13 +14,15 @@ from django.test.testcases import TestCase
 from moderation.tests.utils import setup_moderation, teardown_moderation
 
 
+USER_MODEL = get_user_model()
+
 class GenericModeratorTestCase(SettingsTestCase):
     fixtures = ['test_users.json', 'test_moderation.json']
     urls = 'django-moderation.test_urls'
     test_settings = 'moderation.tests.settings.generic'
 
     def setUp(self):
-        self.user = User.objects.get(username='admin')
+        self.user = USER_MODEL.objects.get(username='admin')
         obj = ModeratedObject(content_object=self.user)
         obj.save()
         self.user.moderated_object = obj
@@ -79,7 +82,7 @@ class AutoModerateModeratorTestCase(TestCase):
     fixtures = ['test_users.json']
 
     def setUp(self):
-        self.user = User.objects.get(username='admin')
+        self.user = USER_MODEL.objects.get(username='admin')
         self.moderator = GenericModerator(UserProfile)
         self.obj = object
 
@@ -191,7 +194,7 @@ class ByPassModerationTestCase(SettingsTestCase):
         self.moderation = setup_moderation([(UserProfile,
                                              UserProfileModerator)])
 
-        self.user = User.objects.get(username='moderator')
+        self.user = USER_MODEL.objects.get(username='moderator')
         self.profile = UserProfile.objects.get(user__username='moderator')
 
     def tearDown(self):
@@ -200,7 +203,7 @@ class ByPassModerationTestCase(SettingsTestCase):
     def test_bypass_moderation_after_approval(self):
         profile = UserProfile(description='Profile for new user',
                               url='http://www.test.com',
-                              user=User.objects.get(username='user1'))
+                              user=USER_MODEL.objects.get(username='user1'))
         profile.save()
 
         profile.moderated_object.approve(self.user)
@@ -256,7 +259,7 @@ class VisibilityColumnTestCase(SettingsTestCase):
         self.moderation = setup_moderation([(ModelWithVisibilityField,
                                              UserProfileModerator)])
 
-        self.user = User.objects.get(username='moderator')
+        self.user = USER_MODEL.objects.get(username='moderator')
         #self.profile = UserProfile.objects.get(user__username='moderator')
 
     def tearDown(self):

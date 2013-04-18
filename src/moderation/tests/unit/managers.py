@@ -5,7 +5,7 @@ Created on 2009-12-10
 '''
 from moderation.tests.utils.testsettingsmanager import SettingsTestCase
 from django.core import management
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from moderation.tests.apps.test_app1.models import UserProfile, \
     ModelWithSlugField2, ModelWithVisibilityField
 from moderation.managers import ModerationObjectsManager
@@ -26,7 +26,7 @@ class ModerationObjectsManagerTestCase(SettingsTestCase):
     def setUp(self):
         from django.db.models import signals
 
-        self.user = User.objects.get(username='moderator')
+        self.user = get_user_model().objects.get(username='moderator')
         self.profile = UserProfile.objects.get(user__username='moderator')
 
         class UserProfileModerator(GenericModerator):
@@ -97,7 +97,7 @@ class ModeratedObjectManagerTestCase(SettingsTestCase):
     def setUp(self):
         self.moderation = setup_moderation([UserProfile, ModelWithSlugField2])
 
-        self.user = User.objects.get(username='admin')
+        self.user = get_user_model().objects.get(username='admin')
 
     def tearDown(self):
         teardown_moderation()
@@ -108,7 +108,7 @@ class ModeratedObjectManagerTestCase(SettingsTestCase):
 
         model2 = UserProfile(description='Profile for new user',
                              url='http://www.yahoo.com',
-                             user=User.objects.get(username='user1'))
+                             user=get_user_model().objects.get(username='user1'))
 
         model2.save()
 

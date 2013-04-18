@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core import management
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.manager import Manager
@@ -20,13 +20,15 @@ import unittest
 from django.db import IntegrityError
 
 
+USER_MODEL = get_user_model()
+
 class RegistrationTestCase(SettingsTestCase):
     fixtures = ['test_users.json', 'test_moderation.json']
     test_settings = 'moderation.tests.settings.generic'
 
     def setUp(self):
         self.moderation = setup_moderation([UserProfile])
-        self.user = User.objects.get(username='moderator')
+        self.user = USER_MODEL.objects.get(username='moderator')
 
     def tearDown(self):
         teardown_moderation()
@@ -43,7 +45,7 @@ class RegistrationTestCase(SettingsTestCase):
 
         profile = UserProfile(description='Profile for new user',
                               url='http://www.yahoo.com',
-                              user=User.objects.get(username='user1'))
+                              user=USER_MODEL.objects.get(username='user1'))
 
         profile.save()
 
@@ -56,7 +58,7 @@ class RegistrationTestCase(SettingsTestCase):
         """
         profile = UserProfile(description='Profile for new user',
                               url='http://www.yahoo.com',
-                              user=User.objects.get(username='user1'))
+                              user=USER_MODEL.objects.get(username='user1'))
 
         profile.save()
 
@@ -83,7 +85,7 @@ class RegistrationTestCase(SettingsTestCase):
         moderation object is created"""
         UserProfile(description='Profile for new user',
                     url='http://www.yahoo.com',
-                    user=User.objects.get(username='user1')).save()
+                    user=USER_MODEL.objects.get(username='user1')).save()
 
         self.assertEqual(ModeratedObject.objects.all().count(),
                          1,
@@ -247,7 +249,7 @@ class ModerationManagerTestCase(SettingsTestCase):
 
     def setUp(self):
         self.moderation = setup_moderation()
-        self.user = User.objects.get(username='moderator')
+        self.user = USER_MODEL.objects.get(username='moderator')
 
     def tearDown(self):
         teardown_moderation()
@@ -268,7 +270,7 @@ class ModerationManagerTestCase(SettingsTestCase):
 
         UserProfile(description='Profile for new user',
                     url='http://www.yahoo.com',
-                    user=User.objects.get(username='user1')).save()
+                    user=USER_MODEL.objects.get(username='user1')).save()
 
         self.moderation.unregister(UserProfile)
 
@@ -283,7 +285,7 @@ class ModerationManagerTestCase(SettingsTestCase):
 
         UserProfile.objects.get(user__username='user1')
 
-        User.objects.get(username='moderator')
+        USER_MODEL.objects.get(username='moderator')
         management.call_command('loaddata', 'test_moderation.json',
                                 verbosity=0)
 
@@ -307,7 +309,7 @@ class ModerationManagerTestCase(SettingsTestCase):
 
         profile = UserProfile(description='Profile for new user',
                               url='http://www.yahoo.com',
-                              user=User.objects.get(username='user1'))
+                              user=USER_MODEL.objects.get(username='user1'))
 
         profile.save()
 
@@ -387,7 +389,7 @@ class LoadingFixturesTestCase(SettingsTestCase):
 
     def setUp(self):
         self.new_moderation = setup_moderation([UserProfile])
-        self.user = User.objects.get(username='moderator')
+        self.user = USER_MODEL.objects.get(username='moderator')
 
     def tearDown(self):
         teardown_moderation()
@@ -410,7 +412,7 @@ class LoadingFixturesTestCase(SettingsTestCase):
     def test_moderated_object_is_created_when_not_loaded_from_fixture(self):
         profile = UserProfile(description='Profile for new user',
                               url='http://www.yahoo.com',
-                              user=User.objects.get(username='user1'))
+                              user=USER_MODEL.objects.get(username='user1'))
 
         profile.save()
 
@@ -432,7 +434,7 @@ class ModerationSignalsTestCase(SettingsTestCase):
 
         self.moderation._disconnect_signals(UserProfile)
 
-        self.user = User.objects.get(username='moderator')
+        self.user = USER_MODEL.objects.get(username='moderator')
         self.profile = UserProfile.objects.get(user__username='moderator')
 
     def tearDown(self):
@@ -500,7 +502,7 @@ class ModerationSignalsTestCase(SettingsTestCase):
 
         profile = UserProfile(description='Profile for new user',
                               url='http://www.yahoo.com',
-                              user=User.objects.get(username='user1'))
+                              user=USER_MODEL.objects.get(username='user1'))
 
         profile.save()
 
@@ -566,7 +568,7 @@ class ModerationSignalsTestCase(SettingsTestCase):
                                   sender=UserProfile)
         profile = UserProfile(description='Profile for new user',
                               url='http://www.yahoo.com',
-                              user=User.objects.get(username='user1'))
+                              user=USER_MODEL.objects.get(username='user1'))
 
         profile.save()
 
@@ -586,7 +588,7 @@ class ModerationSignalsTestCase(SettingsTestCase):
                                  sender=UserProfile)
         profile = UserProfile(description='Profile for new user',
                               url='http://www.yahoo.com',
-                              user=User.objects.get(username='user1'))
+                              user=USER_MODEL.objects.get(username='user1'))
 
         profile.save()
 

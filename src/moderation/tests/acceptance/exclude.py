@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 
 from moderation.moderator import GenericModerator
@@ -74,9 +74,10 @@ class ExcludeAcceptanceTestCase(SettingsTestCase):
         Create new object, only non excluded fields are used
         by moderation system
         '''
+        user = get_user_model().objects.get(username='user1')
         profile = UserProfile(description='Profile for new user',
                               url='http://www.dominno.com',
-                              user=User.objects.get(username='user1'))
+                              user=user)
         profile.save()
 
         url = reverse('admin:moderation_moderatedobject_change',
